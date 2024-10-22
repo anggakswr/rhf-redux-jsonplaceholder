@@ -3,6 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 interface FormData {
@@ -11,6 +12,8 @@ interface FormData {
 }
 
 export default function Page() {
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -21,8 +24,7 @@ export default function Page() {
     mutationFn: (data: FormData) =>
       axios.post(`https://jsonplaceholder.typicode.com/posts`, data),
     onSuccess: () => {
-      // Invalidate and refetch
-      // queryClient.invalidateQueries({ queryKey: ['todos'] })
+      router.push(`/`);
     },
   });
 
