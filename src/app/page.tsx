@@ -1,5 +1,7 @@
 "use client";
 
+import { useAppDispatch, useAppSelector } from "@/components/CustomProviders";
+import { setPosts } from "@/store/postsSlice";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
@@ -18,19 +20,22 @@ export default function Home() {
   const pageNumber = parseInt(page);
 
   // The `state` arg is correctly typed as `RootState` already
-  // const posts = useAppSelector((state) => state.posts.posts);
-  // const dispatch = useAppDispatch();
+  const posts = useAppSelector((state) => state.posts.posts);
+  const dispatch = useAppDispatch();
 
   // https://jsonplaceholder.typicode.com/posts
   const query = useQuery({
     queryKey: ["/posts", pageNumber],
-    queryFn: () =>
-      axios.get(
+    queryFn: async () => {
+      const res = await axios.get(
         `https://jsonplaceholder.typicode.com/posts?page=${pageNumber}`,
-      ),
-  });
+      );
 
-  const posts: Post[] = query.data?.data.slice(0, 5) ?? [];
+      const posts: Post[] = res.data ?? [];
+      dispatch(setPosts(posts));
+      return posts;
+    },
+  });
 
   return (
     <>
@@ -53,7 +58,7 @@ export default function Home() {
         <p>Loading ...</p>
       ) : (
         <>
-          {posts.map((post) => (
+          {posts.slice(0, 5).map((post) => (
             <div key={`post-${post.id}`} className="mb-4 border p-4 shadow">
               <p className="font-bold">Title</p>
               <p className="mb-4">{post.title}</p>
